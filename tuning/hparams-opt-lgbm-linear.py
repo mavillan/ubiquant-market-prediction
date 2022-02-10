@@ -135,14 +135,14 @@ def pearsonr(preds: np.array, dset: lgb.Dataset):
 
 def objective(trial):    
     sampled_params = dict(
-        num_leaves = 2 ** trial.suggest_int("num_leaves_exp", 4, 10),
-        feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.2, 1.0, 0.05),
+        num_leaves = 2 ** trial.suggest_int("num_leaves_exp", 4, 8),
+        feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.1, 1.0, 0.05),
         bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.5, 1.0, 0.05),
-        lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-3, 1e1),
-        lambda_l2 = trial.suggest_loguniform("lambda_l2", 1e-3, 1e1),
-        linear_lambda = trial.suggest_loguniform("linear_lambda", 1e-3, 1e2),
-        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 50, 500, 50),
-        path_smooth = trial.suggest_float("path_smooth", 0., 10.),
+        lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-4, 1e1),
+        lambda_l2 = trial.suggest_loguniform("lambda_l2", 1e-4, 1e1),
+        linear_lambda = trial.suggest_loguniform("linear_lambda", 1e-2, 1e2),
+        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 500, 1000, 50),
+        path_smooth = trial.suggest_float("path_smooth", 0., 20.),
     )
     model_params = {**default_params, **sampled_params}
     
@@ -164,7 +164,7 @@ def objective(trial):
     corr_mean = corrs.mean()
     corr_std = corrs.std()
     
-    return corr_mean            
+    return corr_mean          
 
 
 # In[11]:
@@ -179,7 +179,7 @@ study = optuna.create_study(
 study.optimize(
     objective, 
     n_trials=1000, 
-    timeout=43200, # 12-hrs
+    timeout=28800, # 8-hrs
     n_jobs=1, 
     gc_after_trial=True,
 ) 
