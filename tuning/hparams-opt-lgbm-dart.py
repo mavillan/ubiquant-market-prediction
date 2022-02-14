@@ -140,7 +140,7 @@ def pearsonr(preds: np.array, dset: lgb.Dataset):
 
 def objective(trial):    
     sampled_params = dict(
-        num_leaves = 2 ** trial.suggest_int("num_leaves_exp", 6, 8),
+        num_leaves = 2 ** trial.suggest_int("num_leaves_exp", 7, 7),
         feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.1, 0.4, 0.05),
         bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.9, 1.0, 0.05),
         lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-3, 1e1),
@@ -185,7 +185,7 @@ if do_optimize:
     study.optimize(
         objective, 
         n_trials=1000, 
-        timeout=43200, # 12-hrs
+        timeout=172800, # 48-hrs
         n_jobs=1, 
         gc_after_trial=True,
     ) 
