@@ -141,15 +141,15 @@ def pearsonr(preds: np.array, dset: lgb.Dataset):
 def objective(trial):    
     sampled_params = dict(
         num_leaves = 2 ** trial.suggest_int("num_leaves_exp", 7, 7),
-        feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.1, 0.4, 0.05),
-        bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.8, 1.0, 0.05),
+        feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.1, 0.5, 0.05),
+        bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.7, 1.0, 0.05),
         lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-3, 1e1),
         lambda_l2 = trial.suggest_loguniform("lambda_l2", 1e-3, 1e1),
-        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 100, 1000, 100),
+        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 500, 1000, 100),
         path_smooth = trial.suggest_float("path_smooth", 0., 20.),
-        drop_rate = trial.suggest_discrete_uniform("drop_rate", 0.01, 0.1, 0.01),
+        drop_rate = trial.suggest_discrete_uniform("drop_rate", 0.01, 0.2, 0.01),
         max_drop = trial.suggest_int("max_drop", 10, 50, 10),
-        skip_drop = trial.suggest_discrete_uniform("skip_drop", 0.5, 0.9, 0.05),
+        skip_drop = trial.suggest_discrete_uniform("skip_drop", 0.25, 0.75, 0.05),
     )
     model_params = {**default_params, **sampled_params}
     
