@@ -145,9 +145,9 @@ def objective(trial):
         bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.7, 1.0, 0.05),
         lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-3, 1e1),
         lambda_l2 = trial.suggest_loguniform("lambda_l2", 1e-3, 1e1),
-        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 500, 1000, 100),
-        path_smooth = trial.suggest_float("path_smooth", 0., 20.),
-        drop_rate = trial.suggest_discrete_uniform("drop_rate", 0.01, 0.2, 0.01),
+        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 500, 2000, 100),
+        path_smooth = trial.suggest_float("path_smooth", 0., 50.),
+        drop_rate = trial.suggest_discrete_uniform("drop_rate", 0.05, 0.2, 0.01),
         max_drop = trial.suggest_int("max_drop", 10, 50, 10),
         skip_drop = trial.suggest_discrete_uniform("skip_drop", 0.25, 0.75, 0.05),
     )
@@ -156,7 +156,7 @@ def objective(trial):
     model = lgb.train(
         params=model_params,
         train_set=train_dset,
-        num_boost_round=trial.suggest_int("num_iterations", 1000, 2000, 100),
+        num_boost_round=trial.suggest_int("num_iterations", 500, 2000, 100),
     )
     
     # metric calculation
@@ -185,7 +185,7 @@ if do_optimize:
     study.optimize(
         objective, 
         n_trials=1000, 
-        timeout=86400, # 24-hrs
+        timeout=201600, # 56-hrs
         n_jobs=1, 
         gc_after_trial=True,
     ) 
