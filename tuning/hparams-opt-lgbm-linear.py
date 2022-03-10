@@ -135,26 +135,22 @@ def pearsonr(preds: np.array, dset: lgb.Dataset):
 
 def objective(trial):    
     sampled_params = dict(
-        num_leaves = 2 ** trial.suggest_int("num_leaves_exp", 4, 8),
-        feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.1, 1.0, 0.05),
-        bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.5, 1.0, 0.05),
+        num_leaves = 2 ** trial.suggest_int("num_leaves_exp", 5, 7),
+        max_bin = 2 ** trial.suggest_int("max_bin_exp", 6, 10) - 1,
+        feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.1, 0.5, 0.05),
+        bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.8, 1.0, 0.05),
         lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-4, 1e1),
         lambda_l2 = trial.suggest_loguniform("lambda_l2", 1e-4, 1e1),
-        linear_lambda = trial.suggest_loguniform("linear_lambda", 1e-2, 1e2),
-        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 500, 1000, 50),
-        path_smooth = trial.suggest_float("path_smooth", 0., 20.),
+        linear_lambda = trial.suggest_float("linear_lambda", 0., 100.),
+        path_smooth = trial.suggest_float("path_smooth", 0., 50.),
+        min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 500, 5000, 100),
     )
     model_params = {**default_params, **sampled_params}
-    
-    es_callback = lgb.early_stopping(stopping_rounds=50, first_metric_only=False, verbose=False)
-    
+        
     model = lgb.train(
         params=model_params,
         train_set=train_dset,
-        num_boost_round=5000,
-        valid_sets=[valid_dset,],
-        feval=pearsonr,
-        callbacks=[es_callback,],
+        num_boost_round=trial.suggest_int("num_iterations", 500, 2000, 100),
     )
     
     # metric calculation
@@ -164,7 +160,7 @@ def objective(trial):
     corr_mean = corrs.mean()
     corr_std = corrs.std()
     
-    return corr_mean          
+    return corr_mean        
 
 
 # In[11]:
@@ -179,7 +175,7 @@ study = optuna.create_study(
 study.optimize(
     objective, 
     n_trials=1000, 
-    timeout=28800, # 8-hrs
+    timeout=129600, # 36hrs
     n_jobs=1, 
     gc_after_trial=True,
 ) 
