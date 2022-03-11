@@ -72,18 +72,6 @@ oof = target.loc[valid_idx,:].copy()
 oof["time_id"] = time.loc[valid_idx,"time_id"]
 features_valid = features.loc[valid_idx,:]
 
-# input dataset for lgbm
-train_dset = lgb.Dataset(
-    data=features.loc[train_idx,:],
-    label=target.loc[train_idx,"target"].values,
-    free_raw_data=True
-)
-valid_dset = lgb.Dataset(
-    data=features.loc[valid_idx,:],
-    label=target.loc[valid_idx,"target"].values,
-    free_raw_data=True
-)
-
 
 # In[7]:
 
@@ -146,7 +134,13 @@ def objective(trial):
         min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 500, 5000, 100),
     )
     model_params = {**default_params, **sampled_params}
-        
+    
+    # input dataset for lgbm
+    train_dset = lgb.Dataset(
+        data=features.loc[train_idx,:],
+        label=target.loc[train_idx,"target"].values,
+        free_raw_data=True
+    )    
     model = lgb.train(
         params=model_params,
         train_set=train_dset,
@@ -159,6 +153,9 @@ def objective(trial):
     corrs = _oof.groupby("time_id").apply(lambda x: stats.pearsonr(x.target, x.pred)[0])
     corr_mean = corrs.mean()
     corr_std = corrs.std()
+    
+    del model,train_dset
+    gc.collect()
     
     return corr_mean        
 
