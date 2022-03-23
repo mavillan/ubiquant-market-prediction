@@ -127,23 +127,23 @@ def pearsonr(preds: np.array, dset: lgb.Dataset):
 def objective(trial):    
     sampled_params = dict(
         feature_fraction = trial.suggest_discrete_uniform("feature_fraction", 0.1, 0.4, 0.05),
-        bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.8, 1.0, 0.05),
-        lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-4, 1e1),
-        lambda_l2 = trial.suggest_loguniform("lambda_l2", 1e-4, 1e1),
+        bagging_fraction = trial.suggest_discrete_uniform("bagging_fraction", 0.9, 1.0, 0.05),
+        lambda_l1 = trial.suggest_loguniform("lambda_l1", 1e-3, 1e2),
+        lambda_l2 = trial.suggest_loguniform("lambda_l2", 1e-3, 1e2),
         linear_lambda = trial.suggest_float("linear_lambda", 0., 500.),
         path_smooth = trial.suggest_float("path_smooth", 0., 50.),
         min_data_in_leaf = trial.suggest_int("min_data_in_leaf", 1000, 5000, 100),
         # dart params
         drop_rate = trial.suggest_discrete_uniform("drop_rate", 0.05, 0.2, 0.01),
-        max_drop = trial.suggest_int("max_drop", 10, 100, 10),
-        skip_drop = trial.suggest_discrete_uniform("skip_drop", 0.25, 0.75, 0.05),  
+        max_drop = trial.suggest_int("max_drop", 5, 50, 5),
+        skip_drop = trial.suggest_discrete_uniform("skip_drop", 0.1, 0.9, 0.05),  
     )
     model_params = {**default_params, **sampled_params}
         
     model = lgb.train(
         params=model_params,
         train_set=train_dset,
-        num_boost_round=trial.suggest_int("num_iterations", 500, 2000, 100),
+        num_boost_round=trial.suggest_int("num_iterations", 500, 3000, 100),
     )
     
     # metric calculation
